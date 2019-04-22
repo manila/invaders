@@ -16,6 +16,11 @@
 	<canvas id="game" width="448" height="512"></canvas>
 	<script>
 	
+	/*
+	Bitmaps
+	
+	Each Alien is assigned two arrays of data. These are crude bitmap sprites
+	*/
 	const ALIEN_SMALL = [[0,0,0,1,1,0,0,0,
 			      0,0,1,1,1,1,0,0,
 			      0,1,1,1,1,1,1,0,
@@ -76,24 +81,42 @@
 		        1,1,1,1,1,1,1,1,1,1,1,
 		        1,1,1,1,1,1,1,1,1,1,1];
 
+	/*
+	This is the base Alien Class, we extend these below for each size of alien
+	*/
 	class Alien {
 		constructor(x, y, width, height, bitmaps) {
 			this.x = x;
 			this.y = y;
-			this.frame = 0;
+			this.frame = 0; //Use this to track sprite animation
 			this.width = width;
 			this.height = height;
 			this.bitmaps = bitmaps;
 		}
-
+		
+		/* 
+		Access bitmap like it's a property, return the current sprite of the alien.  This is a hacky way to animate between two sprites.
+		*/
 		get bitmap() {
 			return this.bitmaps[Math.floor(this.frame % 2)];	
 		}
 
+		/*
+		Paint the Alien on the Game canvas
+		*/
 		draw() {
-			drawBitmap(this.x, this.y, this.width, this.height, this.bitmap, Game.ctx, Game.scale);
+			drawBitmap(this.x, 
+				   this.y, 
+				   this.width, 
+				   this.height, 
+				   this.bitmap, 
+				   Game.ctx, 
+				   Game.scale);
 		}
 		
+		/*
+		Change the X and Y coordinate
+		*/
 		move(directionX, directionY) {
 			this.x += directionX;
 			this.y += directionY;
@@ -101,24 +124,36 @@
 		}
 	}
 
+	/*
+	This is the smallest alien, it sits on the top row
+	*/
 	class AlienSmall extends Alien {
 		constructor (x, y) {
 			super(x, y, 8, 8, ALIEN_SMALL);
 		}
 	}
 
+	/*
+	This is the medium sized alien, this is the one I usually picture when I think of space invaders. It occupys two rows after the first row
+	*/
 	class AlienMedium extends Alien {
 		constructor (x, y) {
 			super(x, y, 11, 8, ALIEN_MEDIUM);
 		}
 	}
 
+	/*
+	The largest alien, it occupys the last two rows
+	*/
 	class AlienLarge extends Alien {
 		constructor (x, y) {
 			super(x, y, 12, 8, ALIEN_LARGE);
 		}	
 	}
 
+	/*
+	This is the player or lasercannon.
+	*/
 	var Player = {
 		x: 106,
 		y: 248,
@@ -126,22 +161,39 @@
 		height: 8,
 		speed: 2,
 		bitmap: PLAYER,
+		/*
+		Since we can only move on the X-axis this is the only parameter accepted in the move function
+		*/
 		move (directionX) {
-			if (directionX > 0) {
+			if (directionX > 0 && this.x + this.width + this.speed < Game.width) {
 				this.x += this.speed;
-			} else if (directionX < 0) {
+			} else if (directionX < 0 && this.x > 0) {
 				this.x -= this.speed;
 			}	
 		},
 		draw() {
-			drawBitmap(this.x, this.y, this.width, this.height, this.bitmap, Game.ctx, Game.scale)
+			drawBitmap(this.x, 
+				   this.y, 
+				   this.width, 
+				   this.height, 
+				   this.bitmap, 
+				   Game.ctx, 
+				   Game.scale)
 		}
 	}
 
+	/*
+	The alien swarm is made up of all three types of aliens in 5 rows
+	
+	The swarm moves side to side lowering each time it reaches the wall.
+
+	The swarm is a large entity with propertys to track it position, each alien also has their own propertys for tracking position 
+	*/
 	var Swarm = {
 		x: 24,
 		y: 0,
-		width: 0,
+		width: 0, //furthest occupied pixel on the right of the screen
+		height: 0, //lowest occupied pixel on the bottom of the screen
 		direction: {
 				x: 2,
 				y: 0
@@ -153,46 +205,71 @@
 			}	
 		},
 		move() {
-			this.update();
+			this.update(); //Update the size and direction (if hitting a wall) before moving each alien in the swarm
 
 			for (let i=0; i<this.aliens.length; i++) {
 				this.aliens[i].move(this.direction.x, this.direction.y);
 			}
 		},
+		/*
+		This function tracks the size of the swarm and updates the direction that the swarm will move if there is an alien on the end hitting a wall
+		*/
 		update() {
+			/* Find the alien that exends the farthest of the right and bottom edge of the swarm */
 			for (let i=0; i<this.aliens.length; i++) {
 				this.width = 0;
+				this.height = 0;
 		
 				if (this.aliens[i].x + this.aliens[i].width > this.width) {
 					this.width = this.aliens[i].x + this.aliens[i].width;
 				}	
+
+				if (this.aliens[i].y + this.aliens[i].height > this.height) {
+					this.height = this.aliens[i].y + this.aliens[i].height;
+				}
 			}
+
+			/* End game if swarm hits same y coordinate as player */
+			if (this.height >= 247) {
+				Game.end();
+			} 
 			
+			/* Check if alien is going to hit the right side */
 			if (this.width + this.direction.x > Game.width && Math.floor(this.y % 2) == 0) {
 				this.direction.y = 3;
 				this.direction.x = 0;
 				this.y += this.direction.y;
+			/* Check if alien is going to hit left side */
 			} else if (this.x <= 0 && Math.floor(this.y % 2) !== 0) {
 				this.direction.y = 3;
 				this.direction.x = 0;
 				this.y += this.direction.y; 
+			/* Move aliens left or right depending on if they are in an Odd or Even Y position */
 			} else {
 				this.direction.y = 0;
 				this.direction.x = Math.floor(this.y % 2) == 0 ? 2 : -2;
 				this.x += this.direction.x;
 			}	
 		},
-		build() {
+		/*
+		Populate the swarm with 5 rows of 11 aliens
+		*/
+		populate() {
+			/* First Row */
 			for(let i=0; i<11; i++) {
 				this.aliens.push(new AlienSmall((i * 16) + 2 + this.x, 0));
 			}	
 		
+			/* Second and Third Row */
 			for(let i=0; i<22; i++) {
-				this.aliens.push(new AlienMedium((Math.floor(i % 11) * 16) + 1 + this.x, 16 + Math.floor(i / 11) * 16));
+				this.aliens.push(new AlienMedium(Math.floor(i % 11) * 16 + 1 + this.x, 
+								 16 + Math.floor(i / 11) * 16));
 			}
 
+			/* Fourth and Fifth Row */
 			for(let i=0; i<22; i++) {
-				this.aliens.push(new AlienLarge(Math.floor(i % 11) * 16 + this.x, 48 + Math.floor(i / 11) * 16));
+				this.aliens.push(new AlienLarge(Math.floor(i % 11) * 16 + this.x, 
+								48 + Math.floor(i / 11) * 16));
 			} 
 		}
 	}
@@ -200,13 +277,80 @@
 	var Game = {
 		canvas: null,
 		ctx: null,
+		paintDelta: 0,
+		alienDelta: 0,
+		paintLast: 0,
+		alienLastAnimFrame: 0,
+		animationRequest: null,
 		scale: 2,
 		width: 224,
 		height: 256,
+		now: 0,
+		paintInterval: 1000/60,
+		alienMoveInterval: 1000,
 		canvasHeight: 512,
-		canvasWidth: 512,
+		canvasWidth: 448,
+		clear() {
+			this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+		},
+		/* Draw all pieces of the Game */
+		draw() {
+			Game.clear();
+			Swarm.draw();
+			Player.draw();
+		},
+		/* Setup canvas, populate swarm, and listen for keystrokes */
+		setup(canvasElement) {
+			this.canvas = canvasElement;
+			this.ctx = this.canvas.getContext("2d");
+
+			Swarm.populate();
+
+			window.addEventListener("keydown", function (e) {
+				switch (e.keyCode) {
+				case 37:
+					Player.move(-1);
+					break;
+				case 39:
+					Player.move(1);
+					break;
+				default:
+					console.log(e.keyCode);
+					break;
+				}
+			});
+
+		},
+		/* Call loop with requestAnimationFrame, draw Game close to 60FPS, also use this to time the movement of the aliens */
+		loop() {
+			Game.now = Date.now();
+
+			Game.paintDelta = Game.now - Game.paintLast;
+			Game.alienDelta = Game.now - Game.alienLastAnimFrame;
+
+			if (Game.paintDelta > Game.paintInterval) {
+				Game.draw();
+				Game.paintLast = Game.now - (Game.paintDelta % Game.paintDelta);
+			}
+
+			if (Game.alienDelta > Game.alienMoveInterval) {
+				Swarm.move();
+				Game.alienLastAnimFrame = Game.now - (Game.alienDelta % Game.alienDelta);
+			}
+
+			Game.animationRequest = window.requestAnimationFrame(Game.loop);
+		},
+		start() {
+			Game.animationRequest = window.requestAnimationFrame(Game.loop);
+		},
+		end() {
+			window.cancelAnimationFrame(Game.animationRequest);
+			alert("Game Over");
+			Swarm.aliens = null;
+		}
 	}
 
+	/* Draw an individual pixel at a specified coordinate */
 	function putPixel(x, y, context, scale) {
 		if (y >= 248) {
 			context.fillStyle = '#00FF00';
@@ -216,6 +360,7 @@
 		context.fillRect(x * scale, y * scale, scale, scale);
 	}
 
+	/* Draw an array of pixels at a specified coordinate */
 	function drawBitmap(x, y, width, height, bitmap, context, scale) {
 		for (let i=0; i<width*height; i++) {
 			if (bitmap[i] == 1) {
@@ -227,44 +372,8 @@
 		}
 	}
 
-	function setupGame() {
-		Game.canvas = document.getElementById("game");
-		Game.ctx = Game.canvas.getContext("2d");
-
-		Swarm.build();
-		Swarm.draw();
-	
-		window.addEventListener("keydown", function (e) {
-			switch (e.keyCode) {
-				case 37:
-					Player.x -= Player.speed;
-					break;
-				case 39:
-					Player.x += Player.speed;
-					break;
-				default:
-					console.log(e.keyCode);
-					break;
-			}
-		});
-
-		window.addEventListener("keyup", function (e) {
-			Player.speed = 2;
-		});
-
-		setInterval(gameLoop, 1000 / 60);
-		setInterval(function () {
-			Swarm.move();	
-		}, 1000);
-	}
-
-	function gameLoop() {
-		Game.ctx.clearRect(0, 0, Game.canvasWidth, Game.canvasHeight);
-		Player.draw();
-		Swarm.draw();
-	}
-
-	setupGame();
+	Game.setup(document.getElementById("game"));
+	Game.start();
 
 	</script>
 </body>
