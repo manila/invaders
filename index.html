@@ -16,111 +16,199 @@
 	<canvas id="game" width="448" height="512"></canvas>
 	<script>
 	
-	const alien_0 = [[0,0,0,1,1,0,0,0,
-			  0,0,1,1,1,1,0,0,
-			  0,1,1,1,1,1,1,0,
-			  1,1,0,1,1,0,1,1,
-			  1,1,1,1,1,1,1,1,
-			  0,1,0,1,1,0,1,0,
-			  1,0,0,0,0,0,0,1,
-			  0,1,0,0,0,0,1,0],
-			 [0,0,0,1,1,0,0,0,
-			  0,0,1,1,1,1,0,0,
-			  0,1,1,1,1,1,1,0,
-			  1,1,0,1,1,0,1,1,
-			  1,1,1,1,1,1,1,1,
-			  0,0,1,0,0,1,0,0,
-			  0,1,0,1,1,0,1,0,
-			  1,0,1,0,0,1,0,1]];
+	const ALIEN_SMALL = [[0,0,0,1,1,0,0,0,
+			      0,0,1,1,1,1,0,0,
+			      0,1,1,1,1,1,1,0,
+			      1,1,0,1,1,0,1,1,
+			      1,1,1,1,1,1,1,1,
+			      0,1,0,1,1,0,1,0,
+			      1,0,0,0,0,0,0,1,
+			      0,1,0,0,0,0,1,0],
+			     [0,0,0,1,1,0,0,0,
+			      0,0,1,1,1,1,0,0,
+			      0,1,1,1,1,1,1,0,
+			      1,1,0,1,1,0,1,1,
+			      1,1,1,1,1,1,1,1,
+			      0,0,1,0,0,1,0,0,
+			      0,1,0,1,1,0,1,0,
+			      1,0,1,0,0,1,0,1]];
 	
-	const alien_1 = [[0,0,1,0,0,0,0,0,1,0,0,
-			  0,0,0,1,0,0,0,1,0,0,0,
-			  0,0,1,1,1,1,1,1,1,0,0,
-			  0,1,1,0,1,1,1,0,1,1,0,
-			  1,1,1,1,1,1,1,1,1,1,1,
-			  1,0,1,1,1,1,1,1,1,0,1,
-			  1,0,1,0,0,0,0,0,1,0,1,
-			  0,0,0,1,1,0,1,1,0,0,0],
-			 [0,0,1,0,0,0,0,0,1,0,0,
-			  1,0,0,1,0,0,0,1,0,0,1,
-			  1,0,1,1,1,1,1,1,1,0,1,
-			  1,1,1,0,1,1,1,0,1,1,1,
-			  1,1,1,1,1,1,1,1,1,1,1,
-			  0,1,1,1,1,1,1,1,1,1,0,
-			  0,0,1,0,0,0,0,0,1,0,0,
-			  0,1,0,0,0,0,0,0,0,1,0]];
+	const ALIEN_MEDIUM = [[0,0,1,0,0,0,0,0,1,0,0,
+			       0,0,0,1,0,0,0,1,0,0,0,
+			       0,0,1,1,1,1,1,1,1,0,0,
+			       0,1,1,0,1,1,1,0,1,1,0,
+			       1,1,1,1,1,1,1,1,1,1,1,
+			       1,0,1,1,1,1,1,1,1,0,1,
+			       1,0,1,0,0,0,0,0,1,0,1,
+			       0,0,0,1,1,0,1,1,0,0,0],
+			      [0,0,1,0,0,0,0,0,1,0,0,
+			       1,0,0,1,0,0,0,1,0,0,1,
+			       1,0,1,1,1,1,1,1,1,0,1,
+			       1,1,1,0,1,1,1,0,1,1,1,
+			       1,1,1,1,1,1,1,1,1,1,1,
+			       0,1,1,1,1,1,1,1,1,1,0,
+			       0,0,1,0,0,0,0,0,1,0,0,
+			       0,1,0,0,0,0,0,0,0,1,0]];
 
-	const alien_2 = [[0,0,0,0,1,1,1,1,0,0,0,0,
-			  0,1,1,1,1,1,1,1,1,1,1,0,
-			  1,1,1,1,1,1,1,1,1,1,1,1,
-			  1,1,1,0,0,1,1,0,0,1,1,1,
-			  1,1,1,1,1,1,1,1,1,1,1,1,
-			  0,0,0,1,1,0,0,1,1,0,0,0,
-			  0,0,1,1,0,1,1,0,1,1,0,0,
-			  1,1,0,0,0,0,0,0,0,0,1,1],
-			 [0,0,0,0,1,1,1,1,0,0,0,0,
-			  0,1,1,1,1,1,1,1,1,1,1,1,
-			  1,1,1,1,1,1,1,1,1,1,1,1,
-			  1,1,1,0,0,1,1,0,0,1,1,1,
-			  1,1,1,1,1,1,1,1,1,1,1,1,
-			  0,0,1,1,1,0,0,1,1,1,0,0,
-			  0,1,1,0,0,1,1,0,0,1,1,0,
-			  0,0,1,1,0,0,0,0,1,1,0,0]];
+	const ALIEN_LARGE = [[0,0,0,0,1,1,1,1,0,0,0,0,
+			      0,1,1,1,1,1,1,1,1,1,1,0,
+			      1,1,1,1,1,1,1,1,1,1,1,1,
+			      1,1,1,0,0,1,1,0,0,1,1,1,
+			      1,1,1,1,1,1,1,1,1,1,1,1,
+			      0,0,0,1,1,0,0,1,1,0,0,0,
+			      0,0,1,1,0,1,1,0,1,1,0,0,
+			      1,1,0,0,0,0,0,0,0,0,1,1],
+			     [0,0,0,0,1,1,1,1,0,0,0,0,
+			      0,1,1,1,1,1,1,1,1,1,1,0,
+			      1,1,1,1,1,1,1,1,1,1,1,1,
+			      1,1,1,0,0,1,1,0,0,1,1,1,
+			      1,1,1,1,1,1,1,1,1,1,1,1,
+			      0,0,1,1,1,0,0,1,1,1,0,0,
+			      0,1,1,0,0,1,1,0,0,1,1,0,
+		 	      0,0,1,1,0,0,0,0,1,1,0,0]];
 
-	const lasercannon = [0,0,0,0,0,1,0,0,0,0,0,
-		 	     0,0,0,0,1,1,1,0,0,0,0,
-			     0,0,0,0,1,1,1,0,0,0,0,
-			     0,1,1,1,1,1,1,1,1,1,0,
-			     1,1,1,1,1,1,1,1,1,1,1,
-			     1,1,1,1,1,1,1,1,1,1,1,
-			     1,1,1,1,1,1,1,1,1,1,1,
-			     1,1,1,1,1,1,1,1,1,1,1];
+	const PLAYER = [0,0,0,0,0,1,0,0,0,0,0,
+		        0,0,0,0,1,1,1,0,0,0,0,
+		        0,0,0,0,1,1,1,0,0,0,0,
+		        0,1,1,1,1,1,1,1,1,1,0,
+		        1,1,1,1,1,1,1,1,1,1,1,
+		        1,1,1,1,1,1,1,1,1,1,1,
+		        1,1,1,1,1,1,1,1,1,1,1,
+		        1,1,1,1,1,1,1,1,1,1,1];
 
 	class Alien {
-		constructor(x, y, width, height) {
+		constructor(x, y, width, height, bitmaps) {
 			this.x = x;
 			this.y = y;
 			this.frame = 0;
 			this.width = width;
 			this.height = height;
-			this.bitmaps = alien_1;
+			this.bitmaps = bitmaps;
 		}
 
 		get bitmap() {
 			return this.bitmaps[Math.floor(this.frame % 2)];	
 		}
+
+		draw() {
+			drawBitmap(this.x, this.y, this.width, this.height, this.bitmap, Game.ctx, Game.scale);
+		}
+		
+		move(directionX, directionY) {
+			this.x += directionX;
+			this.y += directionY;
+			this.frame++;
+		}
+	}
+
+	class AlienSmall extends Alien {
+		constructor (x, y) {
+			super(x, y, 8, 8, ALIEN_SMALL);
+		}
+	}
+
+	class AlienMedium extends Alien {
+		constructor (x, y) {
+			super(x, y, 11, 8, ALIEN_MEDIUM);
+		}
+	}
+
+	class AlienLarge extends Alien {
+		constructor (x, y) {
+			super(x, y, 12, 8, ALIEN_LARGE);
+		}	
 	}
 
 	var Player = {
-		x: 0,
-		y: 100,
+		x: 106,
+		y: 248,
 		width: 11,
 		height: 8,
 		speed: 2,
-		bitmap: lasercannon
+		bitmap: PLAYER,
+		move (directionX) {
+			if (directionX > 0) {
+				this.x += this.speed;
+			} else if (directionX < 0) {
+				this.x -= this.speed;
+			}	
+		},
+		draw() {
+			drawBitmap(this.x, this.y, this.width, this.height, this.bitmap, Game.ctx, Game.scale)
+		}
 	}
 
 	var Swarm = {
-		x: 1,
+		x: 24,
 		y: 0,
+		width: 0,
 		direction: {
 				x: 2,
 				y: 0
 			   },
 		aliens: [],
+		draw() {
+			for (let i=0; i<this.aliens.length; i++) {
+				this.aliens[i].draw();
+			}	
+		},
+		move() {
+			this.update();
+
+			for (let i=0; i<this.aliens.length; i++) {
+				this.aliens[i].move(this.direction.x, this.direction.y);
+			}
+		},
+		update() {
+			for (let i=0; i<this.aliens.length; i++) {
+				this.width = 0;
+		
+				if (this.aliens[i].x + this.aliens[i].width > this.width) {
+					this.width = this.aliens[i].x + this.aliens[i].width;
+				}	
+			}
+			
+			if (this.width + this.direction.x > Game.width && Math.floor(this.y % 2) == 0) {
+				this.direction.y = 3;
+				this.direction.x = 0;
+				this.y += this.direction.y;
+			} else if (this.x <= 0 && Math.floor(this.y % 2) !== 0) {
+				this.direction.y = 3;
+				this.direction.x = 0;
+				this.y += this.direction.y; 
+			} else {
+				this.direction.y = 0;
+				this.direction.x = Math.floor(this.y % 2) == 0 ? 2 : -2;
+				this.x += this.direction.x;
+			}	
+		},
+		build() {
+			for(let i=0; i<11; i++) {
+				this.aliens.push(new AlienSmall((i * 16) + 2 + this.x, 0));
+			}	
+		
+			for(let i=0; i<22; i++) {
+				this.aliens.push(new AlienMedium((Math.floor(i % 11) * 16) + 1 + this.x, 16 + Math.floor(i / 11) * 16));
+			}
+
+			for(let i=0; i<22; i++) {
+				this.aliens.push(new AlienLarge(Math.floor(i % 11) * 16 + this.x, 48 + Math.floor(i / 11) * 16));
+			} 
+		}
 	}
 
 	var Game = {
 		canvas: null,
 		ctx: null,
 		scale: 2,
+		width: 224,
+		height: 256,
 		canvasHeight: 512,
 		canvasWidth: 512,
-		alienArray: []
 	}
 
 	function putPixel(x, y, context, scale) {
-		if (y >= 100) {
+		if (y >= 248) {
 			context.fillStyle = '#00FF00';
 		} else {
 			context.fillStyle = '#FFFFFF';
@@ -139,82 +227,12 @@
 		}
 	}
 
-	function buildAlienArray() {
-		for (let i=0; i<55; i++) {
-			Game.alienArray.push(new Alien(Math.floor(i % 11) * 16, 
-						       Math.floor(i / 11) * 14, 
-						       11, 
-						       8));
-		}
-
-		return Game.alienArray;
-	}
-
-	function drawAliens() {
-		var alienArray = Game.alienArray
-	
-		for (let i=0; i<alienArray.length; i++) {
-			drawBitmap(alienArray[i].x,
-				   alienArray[i].y,
-				   alienArray[i].width,
-				   alienArray[i].height,
-				   alienArray[i].bitmap,
-				   Game.ctx,
-				   Game.scale)
-		}
-	}
-
-	function updateAliens() {
-		var alienArray = Game.alienArray;	
-		
-		Swarm.width = 0;
-		
-		for (let i=0; i<alienArray.length; i++) {
-			if (alienArray[i].width + alienArray[i].x > Swarm.width) {
-				Swarm.width = alienArray[i].width * 2 + alienArray[i].x;
-			}
-		}
-
-		if ((Swarm.width + Swarm.direction.x) * 2 >= Game.canvasWidth) {
-			Swarm.direction.x = 0;
-			Swarm.direction.y = 3;
-			Swarm.y += Swarm.direction.y;
-		} else if ((Swarm.x) < 0) {
-			Swarm.direction.x = 0;
-			Swarm.direction.y = 3;
-			Swarm.y += Swarm.direction.y;
-		} else {
-			Swarm.direction.x = Math.floor(Swarm.y % 2) == 0 ? 2 : -2;
-			Swarm.direction.y = 0;
-		}
-	}
-
-	function moveAliens() {
-		var alienArray = Game.alienArray;		
-
-		for (let i=0; i<alienArray.length; i++) {
-			alienArray[i].frame++;
-			alienArray[i].x += Swarm.direction.x;
-			alienArray[i].y += Swarm.direction.y; 
-		}
-	}
-
-	function drawPlayer() {
-		drawBitmap(Player.x, 
-			   Player.y, 
-			   Player.width, 
-			   Player.height, 
- 		       	   Player.bitmap, 
-			   Game.ctx, 
-			   Game.scale);
-	}
-
 	function setupGame() {
 		Game.canvas = document.getElementById("game");
 		Game.ctx = Game.canvas.getContext("2d");
-		buildAlienArray();
-		drawAliens();
-		drawPlayer();
+
+		Swarm.build();
+		Swarm.draw();
 	
 		window.addEventListener("keydown", function (e) {
 			switch (e.keyCode) {
@@ -236,22 +254,15 @@
 
 		setInterval(gameLoop, 1000 / 60);
 		setInterval(function () {
-			updateAliens();
-			moveAliens();
+			Swarm.move();	
 		}, 1000);
-		//startGame();
 	}
 
 	function gameLoop() {
 		Game.ctx.clearRect(0, 0, Game.canvasWidth, Game.canvasHeight);
-		drawAliens();
-		drawPlayer();
+		Player.draw();
+		Swarm.draw();
 	}
-
-	/*
-	function startGame() {
-	}
-	*/
 
 	setupGame();
 
