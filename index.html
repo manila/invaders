@@ -159,17 +159,32 @@
 		y: 248,
 		width: 11,
 		height: 8,
-		speed: 2,
+		speed: 0,
 		bitmap: PLAYER,
 		/*
 		Since we can only move on the X-axis this is the only parameter accepted in the move function
 		*/
-		move (directionX) {
-			if (directionX > 0 && this.x + this.width + this.speed < Game.width) {
+		move () {
+			/* Check to see if any keys are being pressed */
+			if (Game.keysPressed.length > 0) {
+				/* Check the last key action being pressed */
+				if (Game.keysPressed[Game.keysPressed.length - 1] == 'left') {
+					this.speed = -Game.scale;
+				} else if (Game.keysPressed[Game.keysPressed.length - 1] == 'right') {
+					this.speed = Game.scale;	
+				} else {
+					this.speed = 0;
+				}
+			} else {
+				this.speed = 0;
+			}
+
+			/* Don't go outside the game area */
+			if (this.x + this.speed > 0 &&
+			    this.x + this.width + this.speed < Game.width) {
+
 				this.x += this.speed;
-			} else if (directionX < 0 && this.x > 0) {
-				this.x -= this.speed;
-			}	
+			}
 		},
 		draw() {
 			drawBitmap(this.x, 
@@ -230,7 +245,7 @@
 			}
 
 			/* End game if swarm hits same y coordinate as player */
-			if (this.height >= 247) {
+			if (this.height >= 248) {
 				Game.end();
 			} 
 			
@@ -286,8 +301,19 @@
 		width: 224,
 		height: 256,
 		now: 0,
+		keymap: {
+			'37' : 'left',
+			'65' : 'left',
+			'39' : 'right',
+			'68' : 'right'
+		},
+		keysPressed: [],
+		keys: {
+			'37' : false,
+			'39' : false
+		},
 		paintInterval: 1000/60,
-		alienMoveInterval: 1000,
+		alienMoveInterval: 600,
 		canvasHeight: 512,
 		canvasWidth: 448,
 		clear() {
@@ -306,17 +332,23 @@
 
 			Swarm.populate();
 
-			window.addEventListener("keydown", function (e) {
-				switch (e.keyCode) {
-				case 37:
-					Player.move(-1);
-					break;
-				case 39:
-					Player.move(1);
-					break;
-				default:
-					console.log(e.keyCode);
-					break;
+			window.addEventListener("keydown", function (event) {
+				/* Make sure the key being pressed is mapped to somthing */
+				if (Game.keymap[event.keyCode]) { 
+					/* Add the action of the key to the list of keys pressed */
+					Game.keysPressed.push(Game.keymap[event.keyCode]); 
+				}
+
+				console.log(event.keyCode);
+			});
+		
+			window.addEventListener("keyup", function (event) {
+				/* Make sure key being released is mapped to something */
+				if (Game.keymap[event.keyCode]) { 
+					/* Look for and remove the key action from everywhere in the list of pressed keys */
+					while (Game.keysPressed.indexOf(Game.keymap[event.keyCode]) !== -1) {
+						Game.keysPressed.splice(Game.keysPressed.indexOf(Game.keymap[event.keyCode]),1);
+					}
 				}
 			});
 
@@ -329,6 +361,7 @@
 			Game.alienDelta = Game.now - Game.alienLastAnimFrame;
 
 			if (Game.paintDelta > Game.paintInterval) {
+				Player.move();
 				Game.draw();
 				Game.paintLast = Game.now - (Game.paintDelta % Game.paintDelta);
 			}
@@ -346,7 +379,14 @@
 		end() {
 			window.cancelAnimationFrame(Game.animationRequest);
 			alert("Game Over");
-			Swarm.aliens = null;
+			Game.reset();
+		},
+		reset() {
+			Swarm.x = 0;
+			Swarm.y = 0;
+			Swarm.aliens = [];
+			Swarm.populate();
+			Game.start();
 		}
 	}
 
