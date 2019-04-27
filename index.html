@@ -9,7 +9,7 @@
 	canvas#game {
 		background: inherit;
 		display: block;
-		margin: 2em auto 0em auto;
+		margin: 0em auto 0em auto;
 	}
 	</style>
 </head>
@@ -208,7 +208,7 @@
 	*/
 	var Swarm = {
 		x: 24, //Current X position of whole swarm
-		y: 0,
+		y: 16,
 		width: 0, //furthest occupied pixel on the right of the screen
 		height: 0, //lowest occupied pixel on the bottom of the screen
 		direction: { //direction of the swarm
@@ -276,19 +276,19 @@
 		populate() {
 			/* First Row */
 			for(let i=0; i<11; i++) {
-				this.aliens.push(new AlienSmall((i * 16) + 2 + this.x, 0));
+				this.aliens.push(new AlienSmall((i * 16) + 2 + this.x, this.y));
 			}	
 		
 			/* Second and Third Row */
 			for(let i=0; i<22; i++) {
 				this.aliens.push(new AlienMedium(Math.floor(i % 11) * 16 + 1 + this.x, 
-								 16 + Math.floor(i / 11) * 16));
+								 this.y + 16 + Math.floor(i / 11) * 16));
 			}
 
 			/* Fourth and Fifth Row */
 			for(let i=0; i<22; i++) {
 				this.aliens.push(new AlienLarge(Math.floor(i % 11) * 16 + this.x, 
-								48 + Math.floor(i / 11) * 16));
+								this.y + 48 + Math.floor(i / 11) * 16));
 			} 
 		}
 	}
@@ -328,9 +328,19 @@
 		},
 		/* Resize the canvas element based on window.innerHeight  */
 		resize() {
+			var windowWidth = window.innerWidth;
 			var windowHeight = window.innerHeight;
 			
-			this.scale = Math.floor(windowHeight / this.height) || 1;		
+			var scaleWidth = Math.floor(windowWidth / this.width) || 1;
+			var scaleHeight = Math.floor(windowHeight / this.height) || 1;
+			
+			if (scaleWidth < scaleHeight) {
+				this.scale = scaleWidth;
+			} else {
+				this.scale = scaleHeight;
+			}
+
+			//this.scale = Math.floor(windowHeight / this.height) || 1;
 			this.canvas.width = this.width * this.scale;
 			this.canvas.height = this.height * this.scale;
 			this.ctx = this.canvas.getContext("2d");
