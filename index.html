@@ -134,7 +134,6 @@
 			super(x, y, 8, 8, ALIEN_SMALL);
 		}
 	}
-
 	/*
 	This is the medium sized alien, this is the one I usually picture when I think of space invaders. It occupys two rows after the first row
 	*/
@@ -169,6 +168,10 @@
 		move () {
 			/* Check to see if any keys are being pressed */
 			if (Game.keysPressed.length > 0) {
+				if (Game.keysPressed[Game.keysPressed.length - 1] == 'fire') {
+					this.fire();
+					Game.keysPressed.pop();
+				}
 				/* Check the last key action being pressed */
 				if (Game.keysPressed[Game.keysPressed.length - 1] == 'left') {
 					this.speed = -2;
@@ -196,6 +199,9 @@
 				   this.bitmap, 
 				   Game.ctx, 
 				   Game.scale)
+		},
+		fire() {
+			Game.bullets.push(new Bullet(this.x + 5, this.y)); 
 		}
 	}
 
@@ -293,6 +299,25 @@
 		}
 	}
 
+	class Bullet {
+		constructor(x, y) {
+			this.x = x;
+			this.y = y;
+			this.speed = 5; //speed in pixels
+		}
+
+		move() {
+			this.y -= this.speed;
+		}
+
+		draw() {
+			putPixel(this.x, this.y, Game.ctx, Game.scale);
+			putPixel(this.x, this.y - 1, Game.ctx, Game.scale);
+			putPixel(this.x, this.y - 2, Game.ctx, Game.scale);
+			putPixel(this.x, this.y - 3, Game.ctx, Game.scale);
+		}
+	}
+
 	var Game = {
 		canvas: null, //Canvas element where game is drawn
 		ctx: null, //Context of canvas element
@@ -310,13 +335,15 @@
 			'37' : 'left',
 			'65' : 'left',
 			'39' : 'right',
-			'68' : 'right'
+			'68' : 'right',
+			'32' : 'fire'
 		},
 		keysPressed: [], //Store keys that have been pressed in order of when they are pressed
 		paintInterval: 1000/60, //How often should things be drawn to canvas (FPS)
 		alienMoveInterval: 600, //How often should aliens move in milliseconds
 		canvasWidth: 448, //Width of canvas in pixels, these are physical pixels as they relate directly to the DOM
 		canvasHeight: 512, //Height of canvas in pixels, physical in relation to the DOM
+		bullets: [],
 		clear() {
 			this.ctx.clearRect(0, 0, this.canvasWidth * this.scale, this.canvasHeight * this.scale);
 		},
@@ -325,6 +352,10 @@
 			Game.clear();
 			Swarm.draw();
 			Player.draw();
+			
+			for (let i = 0; i < this.bullets.length; i++) {
+				this.bullets[i].draw();
+			}
 		},
 		/* Resize the canvas element based on window.innerHeight  */
 		resize() {
@@ -385,6 +416,9 @@
 			Game.alienDelta = Game.now - Game.alienLastAnimFrame;
 
 			if (Game.paintDelta > Game.paintInterval) {
+				for (let i = 0; i < Game.bullets.length; i++) {
+					Game.bullets[i].move();
+				}
 				Player.move();
 				Game.draw();
 				Game.paintLast = Game.now - (Game.paintDelta % Game.paintDelta);
